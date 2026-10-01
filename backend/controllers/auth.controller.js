@@ -105,3 +105,23 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
   }
 };
+
+export const logOutUser = async (req, res) => {
+  try {
+    res.cookie("token", "", {
+      httpOnly: true,
+      expires: new Date(0),
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "log out berhasil",
+    });
+  } catch (error) {
+    console.error("error: ", error);
+    res.status(500).json({
+      success: false,
+      message: "server error",
+    });
+  }
+};
