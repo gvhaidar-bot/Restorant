@@ -4,8 +4,8 @@ import { generateToken } from "../utils/generateToken.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
-    if (!username || !email || !password || !role) {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password || !role) {
       return res.status(400).json({ success: false, message: "Semua field harus diisi" });
     }
 
@@ -19,13 +19,14 @@ export const registerUser = async (req, res) => {
 
     const user = await prisma.user.create({
       data: {
-        username,
+        name,
         email,
         password: hashPassword,
+        role,
       },
     });
 
-    const token = generateToken(newUser.id); //untuk user yang baru register, supaya dia gak perlu login ulang setiap kali akses halaman.
+    const token = generateToken(user.id); //untuk user yang baru register, supaya dia gak perlu login ulang setiap kali akses halaman.
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -39,8 +40,9 @@ export const registerUser = async (req, res) => {
       message: "User berhasil didaftarkan",
       user: {
         id: user.id,
-        username: user.username,
+        name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
