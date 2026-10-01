@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+
+# Prisma Client (auto-generated)
+generated/
+# AI tools (personal config)
+.agents/
+.claude/
+.cursor/
+.devin/
+.windsurf/
+skills-lock.json
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp

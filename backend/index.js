@@ -5,7 +5,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import compression from "compression";
 import dotenv from "dotenv";
-
+import authRoutes from "./routes/auth.route.js";
 dotenv.config(); //Baca file .env di root project
 
 const app = express(); //Bikin instance aplikasi Express. Semua middleware & route nanti ditempel ke app ini.
@@ -24,6 +24,8 @@ if (process.env.NODE_ENV !== "production") {
 app.get("/", (req, res) => {
   res.json({ success: true, message: "backend sedang berjalan" });
 });
+
+app.use("/api/auth", authRoutes);
 
 app.listen(PORT, () => {
   console.log(`port berjalan di ${PORT}`);

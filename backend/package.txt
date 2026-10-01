@@ -1,30 +1,44 @@
 cors
 Cross-Origin Resource Sharing — mengatur siapa saja (domain lain) yang boleh akses API 
+
 helmet
 Menambahkan HTTP security headers otomatis (anti XSS, clickjacking, sniffing, dll).
+
 bcryptjs
 Untuk hash password. Jangan pernah simpan password plain text!
+
 jsonwebtoken
 Bikin & verifikasi JWT token — untuk autentikasi (login session).
+
 morgan
 HTTP request logger — catat setiap request masuk ke terminal (method, URL, status, response time).
+
 compression
 Gzip compression untuk response — bikin payload JSON lebih kecil & cepat dikirim ke client.
+
 zod
 Schema validation — validasi input dari user (body, query, params).
+
 dotenv
 Load variabel dari file .env ke process.env.
+
 cloudinary
 Layanan cloud storage & image/video processing.
+
 nodemailer
 Kirim email dari Node.js via SMTP.
+
 express-rate-limit
 Batasi jumlah request per IP dalam rentang waktu tertentu → anti brute-force & spam.
-ookie-parser
+
+cookie-parser
 Parse cookie dari header Cookie → jadi req.cookies.
- slugify
+
+slugify
 Ubah string jadi slug URL-friendly (lowercase, tanpa spasi/simbol).
+
 uuid
 Generate unique ID versi string (v4 random, v7 sortable).
+
 Nodemon 
 Biar gak ctrl + C saat perubahan di sisi backend 
