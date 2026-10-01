@@ -4,62 +4,47 @@ import { generateToken } from "../utils/generateToken.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
-    if (!name || !email || !password || !role) {
-      return res.status(400).json({
-        success: false,
-        message: "tolong name, email, password, dan role dibutuhkan",
-      });
+    const { username, email, password, role } = req.body;
+    if (!username || !email || !password || !role) {
+      return res.status(400).json({ success: false, message: "Semua field harus diisi" });
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const existingUser = await prisma.user.findUnique({ where: { email } });
 
     if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "user sudah keluar melalui email",
-      });
+      return res.status(400).json({ success: false, message: "Email sudah terdaftar" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
       data: {
-        name,
+        username,
         email,
-        password: hashedPassword,
-        role,
+        password: hashPassword,
       },
     });
 
-    const token = generateToken(user.id);
+    const token = generateToken(newUser.id); //untuk user yang baru register, supaya dia gak perlu login ulang setiap kali akses halaman.
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production", // Hanya kirim cookie melalui HTTPS di production
+      sameSite: "strict", // Mencegah CSRF
+      maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie berlaku selama 7 hari
     });
 
     res.status(201).json({
       success: true,
-      message: "akun berhasil dibuat",
+      message: "User berhasil didaftarkan",
       user: {
         id: user.id,
-        name: user.name,
+        username: user.username,
         email: user.email,
-        role: user.role,
       },
     });
   } catch (error) {
-    console.log("error ", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Server Error",
-    });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
   }
 };
