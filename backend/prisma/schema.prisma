@@ -14,7 +14,7 @@ datasource db {
 
 enum Role{
   ADMIN
-  RESTURANT_OWNER
+  RESTAURANT_OWNER
   CUSTOMER
 }
 
