@@ -2,6 +2,6 @@
 
 import jwt from "jsonwebtoken";
 
-export const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" }); //Fungsi sign dari library jsonwebtoken untuk membuat token.
+export const generateToken = async (user) => {
+  return jwt.sign({ user }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
