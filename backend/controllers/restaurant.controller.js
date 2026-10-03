@@ -156,7 +156,7 @@ export const updateRestaurant = async (req, res) => {
     let slug = restaurant.slug;
 
     if (name && name !== restaurant.name) {
-      slug = slugify("name, {
+      slug = slugify(name, {
         lower: true,
         strict: true,
         trim: true,
