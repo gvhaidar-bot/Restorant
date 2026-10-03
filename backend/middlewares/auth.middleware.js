@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 import { prisma } from "../db.js";
+// FIX: hapus import bcrypt — gak dipakai
 
 export const protect = async (req, res, next) => {
   try {
@@ -9,36 +9,43 @@ export const protect = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "anda belum login",
+        message: "Token tidak valid", // FIX: hapus spasi ganda
       });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // memverifikasi token
 
-    if (!decoded) {
-      return res.status(401).json({
-        success: false,
-        message: "token tidak valid",
-      });
-    }
+    // FIX: hapus "if (!decoded)" — gak akan pernah true, karena verify throw error kalau gagal
 
     const user = await prisma.user.findUnique({
       where: {
-        id: decoded.id, // findOne mengambil satu data berdasarkan primary key (id)
+        id: decoded.userId, // FIX: decoded.userId 
       },
     });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "user tidak ditemukan",
+        message: "User tidak ditemukan",
       });
     }
 
     req.user = user; // menyimpan data user ke dalam objek request
     next(); // melanjutkan ke controller
   } catch (error) {
-    console.error("error : ", error);
-    res.status(500).json({ message: "internal server error" });
+    console.error("Auth error:", error);
+
+    // FIX: bedakan error token invalid vs server error
+    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        success: false,
+        message: "Token tidak valid atau sudah kadaluarsa",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };

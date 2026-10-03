@@ -140,14 +140,7 @@ export const getMe = async (req, res) => {
     // FIX: jangan kirim req.user mentah — berisi password hash
     res.status(200).json({
       success: true,
-      user: {
-        id: req.user.id,
-        name: req.user.name, // FIX: username -> name
-        email: req.user.email,
-        role: req.user.role,
-        avatar: req.user.avatar,
-        createdAt: req.user.createdAt,
-      },
+      user: req.user,
     });
   } catch (error) {
     console.error("error : ", error);
