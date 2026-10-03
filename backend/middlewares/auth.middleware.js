@@ -15,11 +15,9 @@ export const protect = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // memverifikasi token
 
-    // FIX: hapus "if (!decoded)" — gak akan pernah true, karena verify throw error kalau gagal
-
     const user = await prisma.user.findUnique({
       where: {
-        id: decoded.userId, // FIX: decoded.userId 
+        id: decoded.userId, // FIX: decoded.userId
       },
     });
 

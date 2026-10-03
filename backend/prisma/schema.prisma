@@ -27,6 +27,33 @@ model User{
  avatar String?
   createat DateTime @default(now())
   updateat DateTime @updatedAt
-
+  restaurants Restaurant[]
   @@map("users")
+}
+
+model Restaurant{
+  id String @id @default(cuid())
+  name String
+  slug String
+  description String?
+  logo String?
+  coverImage String?
+  phone String?
+  email String?
+  address String
+  city String
+  openingTime String?
+  closedTime String?
+  isOpen Boolean @default(true)
+ rating Float @default(0)
+ totalReview Int @default(0)
+
+ ownerId String
+
+ owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade ) //Cascade kalau User dihapus, semua Restaurant-nya ikut terhapus.
+
+ createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@map("restaurants")
 }
