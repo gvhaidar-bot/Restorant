@@ -1,38 +1,44 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { prisma } from "../db.js";
+
 export const protect = async (req, res, next) => {
   try {
-    const { token } = req.cookies;
+    const { token } = req.cookies; // mengambil token dari cookies
+
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Not authorized",
+        message: "anda belum login",
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // memverifikasi token
 
-    const user = prisma.user.findUnique({
+    if (!decoded) {
+      return res.status(401).json({
+        success: false,
+        message: "token tidak valid",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
       where: {
-        id: decoded.userId,
+        id: decoded.id, // findOne mengambil satu data berdasarkan primary key (id)
       },
     });
 
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
-        message: "User tidak ditemukan",
+        message: "user tidak ditemukan",
       });
     }
 
-    req.user = user;
-    next();
+    req.user = user; // menyimpan data user ke dalam objek request
+    next(); // melanjutkan ke controller
   } catch (error) {
     console.error("error : ", error);
-    return res.status(401).json({
-      success: false,
-      message: "invalid token",
-    });
+    res.status(500).json({ message: "internal server error" });
   }
 };

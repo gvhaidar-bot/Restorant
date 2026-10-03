@@ -1,32 +1,35 @@
 import bcrypt from "bcryptjs";
-import {} from "";
-import { prisma } from "../db";
-import { generateToken } from "../utils/generateToken";
+
+import { prisma } from "../db.js"; // FIX: tambah .js
+import { generateToken } from "../utils/generateToken.js"; // FIX: tambah .js
 
 export const register = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
-    if (!username || !email || !password || !role) {
-      return res
-        .status(400)
-        .json({ message: "tidak boleh kosong wajib di isi" });
+    const { name, email, password, role } = req.body; // FIX: username -> name (sesuaikan schema)
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: "tidak boleh kosong wajib di isi" });
     }
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
-    if (!existingUser) {
+    if (existingUser) {
+      // FIX: hapus "!" karena logika sebelumnya terbalik
       return res.status(400).json({ message: "email sudah terdaftar" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // FIX: whitelist role biar user gak bisa kirim "ADMIN" dari body
+    const allowedRoles = ["CUSTOMER", "RESTAURANT_OWNER"];
+    const finalRole = allowedRoles.includes(role) ? role : "CUSTOMER";
+
     const user = await prisma.user.create({
       data: {
-        username,
+        name, // FIX: username -> name
         email,
         password: hashedPassword,
-        role,
+        role: finalRole, // FIX: pakai role yang sudah di-whitelist
       },
     });
 
@@ -44,11 +47,12 @@ export const register = async (req, res) => {
       message: "user berhasil terdaftar",
       user: {
         id: user.id,
-        username: user.username,
+        name: user.name, // FIX: username -> name
         email: user.email,
         role: user.role,
       },
-      token,
+      // FIX: hapus "token" dari response body — udah dikirim lewat cookie
+      // (mengirim token di body = celah XSS, karena bisa dibaca JS)
     });
   } catch (error) {
     console.error("error : ", error);
@@ -67,22 +71,25 @@ export const login = async (req, res) => {
       });
     }
 
-    const user = prisma.user.findUnique({
+    // FIX: tambah "await" — kalau gak, user = Promise, bukan object
+    const user = await prisma.user.findUnique({
       where: {
         email,
       },
     });
 
     if (!user) {
-      return res.status(404).json({
+      // FIX: pesan jangan bocorkan info (email terdaftar atau tidak)
+      return res.status(401).json({
         success: false,
-        message: "email tidak terdaftar",
+        message: "email atau password salah",
       });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password); // membandingkan sandi yang diinput dengan sandi yang ada di database
     if (!isPasswordValid) {
-      return res.status(401).json({ success: false, message: "sandi salah" });
+      // FIX: pesan disamakan biar konsisten & gak bocorkan info
+      return res.status(401).json({ success: false, message: "email atau password salah" });
     }
 
     const token = generateToken(user.id); //membuat token
@@ -99,7 +106,7 @@ export const login = async (req, res) => {
       message: "login berhasil",
       user: {
         id: user.id,
-        username: user.username,
+        name: user.name, // FIX: username -> name
         email: user.email,
         role: user.role,
       },
@@ -120,6 +127,27 @@ export const logOut = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "logout berhasil",
+    });
+  } catch (error) {
+    console.error("error : ", error);
+    res.status(500).json({ message: "internal server error" });
+  }
+};
+
+export const getMe = async (req, res) => {
+  try {
+    // FIX: hapus console.log (buat debugging, jangan di production)
+    // FIX: jangan kirim req.user mentah — berisi password hash
+    res.status(200).json({
+      success: true,
+      user: {
+        id: req.user.id,
+        name: req.user.name, // FIX: username -> name
+        email: req.user.email,
+        role: req.user.role,
+        avatar: req.user.avatar,
+        createdAt: req.user.createdAt,
+      },
     });
   } catch (error) {
     console.error("error : ", error);
